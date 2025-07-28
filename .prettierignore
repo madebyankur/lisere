@@ -1,0 +1,14 @@
+# Documentation files
+README.md
+CHANGELOG.md
+*.md
+
+# Build outputs
+dist/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Generated files
+pnpm-lock.yaml

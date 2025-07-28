@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+pnpm-debug.log*
+
+# IDE
+.cursor/
+.cursor/.rules/
+.vscode/
+
+# Build outputs
+/dist
+dist/
+build/
+out/
+.next/
+apps/docs/.next/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Coverage directory
+coverage/
+*.lcov
+
+# Rollup cache
+.rollup.cache/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test/

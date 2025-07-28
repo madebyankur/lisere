@@ -1,0 +1,21 @@
+{
+  "name": "Liseré",
+  "short_name": "Liseré",
+  "description": "Liseré is a lightweight and composable React component for selecting and highlighting text. Perfect for code documentation, tutorials, and interactive text highlighting and selection.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["development", "utilities", "documentation"],
+  "lang": "en",
+  "dir": "ltr"
+}

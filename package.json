@@ -1,0 +1,93 @@
+{
+  "name": "lisere",
+  "version": "0.1.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "description": "A lightweight and composable React component for selecting and highlighting text. Perfect for code documentation, tutorials, and interactive text highlighting and selection.",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "workspaces": [
+    "apps/*",
+    "."
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "docs": "pnpm --filter=lisere-docs dev",
+    "docs:build": "pnpm --filter=lisere-docs build",
+    "dev:all": "pnpm run dev & pnpm --filter=lisere-docs dev",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "ci": "pnpm run lint && pnpm run test",
+    "local-release": "changeset version && changeset publish",
+    "prepublishOnly": "pnpm run ci"
+  },
+  "keywords": [
+    "lisere",
+    "react",
+    "text",
+    "highlighter",
+    "selection",
+    "annotation",
+    "typescript",
+    "component"
+  ],
+  "author": "Ankur Chauhan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madebyankur/lisere.git"
+  },
+  "bugs": {
+    "url": "https://github.com/madebyankur/lisere/issues"
+  },
+  "homepage": "https://github.com/madebyankur/lisere#readme",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.5",
+    "@eslint/js": "^9.32.0",
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "eslint": "^9.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "rollup": "^4.46.0",
+    "rollup-plugin-css-only": "^4.5.2",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "ts-jest": "^29.4.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
+  }
+}
