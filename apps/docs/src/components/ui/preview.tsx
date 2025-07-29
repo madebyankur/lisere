@@ -78,7 +78,9 @@ export const Preview = ({
               aria-label={copied ? 'Copied to clipboard' : 'Copy to clipboard'}
               className={cn(
                 'text-accent focus-visible:ring-ring bg-contrast/5 hover:border-contrast/5 hover:bg-contrast/10 pointer-events-auto absolute right-4 top-4 z-50 select-none overflow-hidden rounded-full border border-transparent px-2 py-1 text-sm font-semibold outline-none backdrop-blur-sm transition duration-150 focus-visible:ring-2',
-                showCode ? 'opacity-100 ease-in' : 'opacity-0 ease-out',
+                showCode
+                  ? 'pointer-events-auto opacity-100 ease-in'
+                  : 'pointer-events-none opacity-0 ease-out',
               )}
               tabIndex={showCode ? 0 : -1}
               onClick={handleCopy}
