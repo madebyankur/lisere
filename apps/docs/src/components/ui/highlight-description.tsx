@@ -12,7 +12,7 @@ function HighlightDescription({
 }) {
   return (
     <p className={cn('text-accent mb-8 text-pretty text-xl', className)}>
-      <TextHighlighter containerElement="span">
+      <TextHighlighter containerElement="span" removeHighlightOnClick={true}>
         {children as any}
       </TextHighlighter>
     </p>
