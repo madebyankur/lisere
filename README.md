@@ -4,6 +4,8 @@
 
 **Liseré** is a lightweight and composable React component for text highlighting. It gives you precise control over how users select, annotate, and interact with text. Perfect for code documentation, tutorials, and interactive text highlighting and selection.
 
+https://github.com/user-attachments/assets/8abe053a-c2f8-4946-bbee-dc1704111960
+
 ## Install
 
 To get started with the library, install it using:
