@@ -240,11 +240,15 @@ export const removeHighlight = (highlightElement: HTMLElement): void => {
   const parent = highlightElement.parentNode
   if (!parent) return
 
+  // Move all children back to parent
   while (highlightElement.firstChild) {
     parent.insertBefore(highlightElement.firstChild, highlightElement)
   }
 
   parent.removeChild(highlightElement)
+
+  // Normalize text nodes to merge adjacent text nodes
+  parent.normalize()
 
   highlightElementCache.delete(highlightElement)
 }

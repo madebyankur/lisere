@@ -409,6 +409,9 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
         }
 
         removeHighlightById(highlightId)
+
+        // Clear any existing selection to ensure subsequent selections work properly
+        clearSelection()
       } catch (error) {
         console.error('Error removing highlight:', error)
       }
@@ -518,10 +521,9 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
         highlightId &&
         (highlights.has(highlightId) || customHighlights.has(highlightId))
       ) {
-        event.preventDefault()
-        event.stopPropagation()
-
         if (removeHighlightOnClick) {
+          event.preventDefault()
+          event.stopPropagation()
           handleRemoveHighlight(highlightId)
         }
       }
