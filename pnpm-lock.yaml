@@ -109,8 +109,8 @@ importers:
         specifier: ^1.0.0-beta.1
         version: 1.0.0-beta.1(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lisere:
-        specifier: 0.1.0
-        version: 0.1.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 0.1.1
+        version: 0.1.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lucide-react:
         specifier: ^0.525.0
         version: 0.525.0(react@19.1.0)
@@ -2779,8 +2779,8 @@ packages:
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  lisere@0.1.0:
-    resolution: {integrity: sha512-cdwsxGnAquVKOPM3ACwnEirnZp9yWiBpoet5/fD14q/uyRpY7AXOueNFbLK3COWSVhH2kUDb//eSDXKyammUvg==}
+  lisere@0.1.1:
+    resolution: {integrity: sha512-ns74fBGXdFc6esBROGEe+k2hyr25w+QJ+VnfGNg3lEmWNU3KxEn0Ih8lriVFOsGUb6a4yJOcioC/bT9aRk5R/g==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -7110,7 +7110,7 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  lisere@0.1.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  lisere@0.1.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
