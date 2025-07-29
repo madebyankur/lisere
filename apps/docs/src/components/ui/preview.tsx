@@ -107,7 +107,7 @@ export const Preview = ({
           className={cn(
             'text-shadow-primary-foreground text-accent bg-accent/5 transition-discrete focus-visible:ring-ring z-10 flex origin-bottom flex-col overflow-auto whitespace-pre-wrap rounded-b-[26px] rounded-t-xl p-6 pb-16 font-mono text-sm leading-relaxed outline-none duration-200 focus-visible:ring',
             showCode
-              ? 'max-h-[50dvh] opacity-100 blur-0 ease-in'
+              ? 'max-h-[40rem] opacity-100 blur-0 ease-in'
               : 'blur-xs max-h-12 opacity-50 ease-out',
           )}
           tabIndex={showCode ? 0 : -1}
