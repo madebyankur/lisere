@@ -66,7 +66,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <footer className="bg-background border-muted text-accent fixed bottom-0 left-1/2 w-full -translate-x-1/2 border-t border-dashed p-8 text-center text-sm md:max-w-sm">
+        <footer className="bg-background border-muted text-accent text-primary fixed bottom-0 left-1/2 w-full -translate-x-1/2 border-t border-dashed p-8 text-center text-sm md:max-w-sm">
           <p className="mb-2">2025 Liseré</p>
           <p>
             Built by{' '}
@@ -75,7 +75,7 @@ export default function HomePage() {
               aria-labelledby="personal-link"
               aria-label="Ankur Chauhan"
               href="https://ankur.design"
-              className="hover:text-primary focus-visible:ring-ring select-none rounded-sm underline outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+              className="hover:text-primary text-accent focus-visible:ring-ring select-none rounded-sm underline outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -205,7 +205,7 @@ export function UtilityFunctionsExample() {
           className="mx-6 flex flex-col gap-2 sm:flex-row sm:items-center"
         >
           <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex flex-1 flex-col gap-1">
+            <div className="flex flex-1 items-center">
               <Label
                 htmlFor="utility-input"
                 className="text-secondary hidden text-sm font-semibold"
