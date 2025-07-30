@@ -217,7 +217,7 @@ export function UtilityFunctionsExample() {
                 type="text"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Type text to select"
+                placeholder="Enter text to highlight"
                 onKeyDown={e => e.key === 'Enter' && handleManualHighlight()}
               />
             </div>

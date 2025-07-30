@@ -120,8 +120,10 @@ export const Preview = ({
         >
           {code.split('\n').map((line, index) => (
             <code className="flex" key={index}>
-              <span className="text-accent/50 mr-6">{index + 1}</span>
-              <span>{line}</span>
+              <span className="text-accent/50 mr-6 touch-none select-none">
+                {index + 1}
+              </span>
+              <span className="text-primary">{line}</span>
             </code>
           ))}
         </pre>
