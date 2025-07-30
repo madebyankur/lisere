@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   Tooltip,
@@ -21,7 +21,7 @@ const CodeBlock = ({ tabs, active }: { tabs: Tabs[]; active?: Tabs }) => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(activeTab.value);
     setCopied(true);
     setTooltipOpen(true);
@@ -29,12 +29,14 @@ const CodeBlock = ({ tabs, active }: { tabs: Tabs[]; active?: Tabs }) => {
       setCopied(false);
       setTooltipOpen(false);
     }, 2000);
-  };
+  }, [activeTab.value]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeElement = document.activeElement;
-      const isTabFocused = tabRefs.current.some(ref => ref === activeElement);
+      const isTabFocused = tabRefs.current.some(
+        (ref: HTMLButtonElement | null) => ref === activeElement,
+      );
 
       if (e.key === 'ArrowRight') {
         if (tabs.indexOf(activeTab) < tabs.length - 1) {
@@ -65,7 +67,7 @@ const CodeBlock = ({ tabs, active }: { tabs: Tabs[]; active?: Tabs }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeTab, tabs, handleCopy, tabRefs]);
+  }, [activeTab, tabs, handleCopy]);
 
   return (
     <div className="border-border shadow-tiny bg-card grid w-full gap-2 overflow-hidden rounded-[30px] border">
@@ -78,7 +80,7 @@ const CodeBlock = ({ tabs, active }: { tabs: Tabs[]; active?: Tabs }) => {
             <button
               key={index}
               type="button"
-              tabIndex={index}
+              tabIndex={0}
               id={`tab-${key.label}`}
               aria-label={`Switch to ${key.label} tab`}
               role="tab"
