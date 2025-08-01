@@ -12,6 +12,8 @@ jest.mock('../utils', () => ({
   removeHighlight: jest.fn(),
   adjustRangeToWordBoundaries: jest.fn(),
   isSelectionCrossElement: jest.fn(),
+  isSelectionMultiLine: jest.fn(),
+  wouldDragCrossLines: jest.fn(),
   checkRangeIntersection: jest.fn(),
   createHighlightElement: jest.fn(),
   applyReactElementStyles: jest.fn(),
@@ -125,6 +127,52 @@ describe('Utility Functions', () => {
 
       expect(result).toBe(true)
       expect(mockUtils.isSelectionCrossElement).toHaveBeenCalledWith(range)
+    })
+  })
+
+  describe('isSelectionMultiLine', () => {
+    it('should return false for single line selection', () => {
+      mockUtils.isSelectionMultiLine.mockReturnValue(false)
+
+      const range = document.createRange()
+      const result = mockUtils.isSelectionMultiLine(range)
+
+      expect(result).toBe(false)
+      expect(mockUtils.isSelectionMultiLine).toHaveBeenCalledWith(range)
+    })
+
+    it('should return true for multi-line selection', () => {
+      mockUtils.isSelectionMultiLine.mockReturnValue(true)
+
+      const range = document.createRange()
+      const result = mockUtils.isSelectionMultiLine(range)
+
+      expect(result).toBe(true)
+      expect(mockUtils.isSelectionMultiLine).toHaveBeenCalledWith(range)
+    })
+  })
+
+  describe('wouldDragCrossLines', () => {
+    it('should return false for same-container drag', () => {
+      mockUtils.wouldDragCrossLines.mockReturnValue(false)
+
+      const originalRange = document.createRange()
+      const newRange = document.createRange()
+      const result = mockUtils.wouldDragCrossLines(originalRange, newRange)
+
+      expect(result).toBe(false)
+      expect(mockUtils.wouldDragCrossLines).toHaveBeenCalledWith(originalRange, newRange)
+    })
+
+    it('should return true for cross-container drag', () => {
+      mockUtils.wouldDragCrossLines.mockReturnValue(true)
+
+      const originalRange = document.createRange()
+      const newRange = document.createRange()
+      const result = mockUtils.wouldDragCrossLines(originalRange, newRange)
+
+      expect(result).toBe(true)
+      expect(mockUtils.wouldDragCrossLines).toHaveBeenCalledWith(originalRange, newRange)
     })
   })
 
@@ -290,6 +338,22 @@ describe('Utility Functions', () => {
 
       const selection = {
         text: 'Hello',
+        range: document.createRange(),
+        position: { x: 0, y: 0 },
+        boundingRect: {} as DOMRect,
+      }
+
+      const result = mockUtils.isValidSelection(selection, false)
+
+      expect(result).toBe(true)
+      expect(mockUtils.isValidSelection).toHaveBeenCalledWith(selection, false)
+    })
+
+    it('should return true for multi-line selection (now allowed)', () => {
+      mockUtils.isValidSelection.mockReturnValue(true)
+
+      const selection = {
+        text: 'Hello\nWorld',
         range: document.createRange(),
         position: { x: 0, y: 0 },
         boundingRect: {} as DOMRect,

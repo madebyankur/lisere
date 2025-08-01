@@ -3,6 +3,34 @@ import type { HighlightStyle, SelectionBoundary, TextSelection } from './types'
 const highlightElementCache = new Map<HTMLElement, Set<HTMLElement>>()
 
 /**
+ * Throttle utility function for performance optimization
+ */
+export const throttle = <T extends (...args: Parameters<T>) => ReturnType<T>>(
+  func: T,
+  delay: number
+) => {
+  let timeoutId: NodeJS.Timeout | null = null
+  let lastExecTime = 0
+  return ((...args: Parameters<T>) => {
+    const currentTime = Date.now()
+
+    if (currentTime - lastExecTime > delay) {
+      func.apply(null, args)
+      lastExecTime = currentTime
+    } else {
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(
+        () => {
+          func.apply(null, args)
+          lastExecTime = Date.now()
+        },
+        delay - (currentTime - lastExecTime)
+      )
+    }
+  }) as T
+}
+
+/**
  * Get the current text selection from the window
  * @returns TextSelection object with selection details, or null if no valid selection exists
  * @example
@@ -143,6 +171,80 @@ export const getAdjustedSelection = (
  */
 export const isSelectionCrossElement = (range: Range): boolean => {
   return range.startContainer !== range.endContainer
+}
+
+/**
+ * Check if dragging from one range to another would cross line boundaries
+ * @param originalRange - The original range before dragging
+ * @param newRange - The new range after dragging
+ * @returns True if the drag would cross line boundaries
+ */
+export const wouldDragCrossLines = (
+  originalRange: Range,
+  newRange: Range
+): boolean => {
+  try {
+    const commonAncestor = originalRange.commonAncestorContainer
+
+    const containerElement =
+      commonAncestor.nodeType === Node.TEXT_NODE
+        ? commonAncestor.parentElement
+        : (commonAncestor as Element)
+
+    if (!containerElement) {
+      return false
+    }
+
+    const containerRect = containerElement.getBoundingClientRect()
+    const newRangeRect = newRange.getBoundingClientRect()
+
+    if (
+      newRangeRect.top < containerRect.top ||
+      newRangeRect.bottom > containerRect.bottom
+    ) {
+      return true
+    }
+
+    const startContainer = newRange.startContainer
+    const endContainer = newRange.endContainer
+
+    if (startContainer !== endContainer) {
+      const startElement =
+        startContainer.nodeType === Node.TEXT_NODE
+          ? startContainer.parentElement
+          : (startContainer as Element)
+      const endElement =
+        endContainer.nodeType === Node.TEXT_NODE
+          ? endContainer.parentElement
+          : (endContainer as Element)
+
+      if (startElement && endElement && startElement !== endElement) {
+        const blockElements = [
+          'P',
+          'DIV',
+          'H1',
+          'H2',
+          'H3',
+          'H4',
+          'H5',
+          'H6',
+          'LI',
+          'TD',
+          'TH',
+        ]
+        if (
+          blockElements.includes(startElement.tagName) ||
+          blockElements.includes(endElement.tagName)
+        ) {
+          return true
+        }
+      }
+    }
+
+    return false
+  } catch {
+    return false
+  }
 }
 
 /**
@@ -332,6 +434,9 @@ export const isValidSelection = (
   if (!allowCrossElement && isSelectionCrossElement(selection.range)) {
     return false
   }
+
+  // Note: Multi-line selections are allowed during initial selection
+  // They are only prevented during drag operations to maintain single-line highlights
 
   return true
 }

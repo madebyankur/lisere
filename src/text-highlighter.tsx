@@ -12,6 +12,8 @@ import {
   isRangeWithinHighlight,
   isValidSelection,
   removeHighlight,
+  throttle,
+  wouldDragCrossLines,
 } from './utils'
 
 /**
@@ -74,6 +76,7 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
   allowCrossElementSelection = false,
   clearSelectionAfterHighlight = true,
   removeHighlightOnClick = false,
+  showDraggableHandles = false,
   onTextSelected,
   onTextHighlighted,
   onHighlightRemoved,
@@ -102,9 +105,25 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
     y: number
   } | null>(null)
   const [tempHighlightId, setTempHighlightId] = useState<string | null>(null)
+  const [draggedHighlightId, setDraggedHighlightId] = useState<string | null>(
+    null
+  )
 
   const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isProcessingSelectionRef = useRef(false)
+  const dragRef = useRef<{
+    highlightId: string
+    handle: 'left' | 'right'
+  } | null>(null)
+  const dragHandlersRef = useRef<{
+    handleDragStart: (
+      highlightId: string,
+      handle: 'left' | 'right',
+      event: MouseEvent
+    ) => void
+    handleDragMove: (event: MouseEvent) => void
+    handleDragEnd: () => void
+  } | null>(null)
 
   const stableCallbacks = useMemo(
     () => ({
@@ -245,6 +264,10 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
             highlightElementNode = customContainer
           }
 
+          if (showDraggableHandles) {
+            addDraggableHandles(highlightElementNode, highlightId)
+          }
+
           setCustomHighlights(prev => {
             const newCustomHighlights = new Map(prev)
             newCustomHighlights.set(highlightId, {
@@ -261,6 +284,10 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
             stableConfig.highlightStyle
           )
           highlightElementNode.setAttribute('data-highlight-id', highlightId)
+
+          if (showDraggableHandles) {
+            addDraggableHandles(highlightElementNode, highlightId)
+          }
 
           addHighlight(highlightId, {
             element: highlightElementNode,
@@ -318,6 +345,7 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
     highlights,
     customHighlights,
     addHighlight,
+    showDraggableHandles,
   ])
 
   /**
@@ -329,6 +357,34 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
     setSelectionUIPosition(null)
   }, [])
 
+  // Cache for handle references to avoid DOM queries
+  const handleRefs = useRef(
+    new WeakMap<HTMLElement, { left: HTMLElement; right: HTMLElement }>()
+  )
+
+  /**
+   * Remove draggable handles from a highlight element
+   */
+  const removeDraggableHandles = useCallback((element: HTMLElement) => {
+    const handles = handleRefs.current.get(element)
+    if (handles) {
+      handles.left.remove()
+      handles.right.remove()
+      handleRefs.current.delete(element)
+    }
+  }, [])
+
+  /**
+   * Remove highlight and its handles
+   */
+  const removeHighlightWithHandles = useCallback(
+    (element: HTMLElement) => {
+      removeDraggableHandles(element)
+      removeHighlight(element)
+    },
+    [removeDraggableHandles]
+  )
+
   /**
    * Cancel the current highlight
    */
@@ -339,14 +395,14 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
 
       if (highlight && highlight.temporary) {
         try {
-          removeHighlight(highlight.element)
+          removeHighlightWithHandles(highlight.element)
           removeHighlightById(tempHighlightId)
         } catch (error) {
           console.error('Error removing temporary highlight:', error)
         }
       } else if (customHighlight && customHighlight.temporary) {
         try {
-          removeHighlight(customHighlight.element)
+          removeHighlightWithHandles(customHighlight.element)
           removeHighlightById(tempHighlightId)
         } catch (error) {
           console.error('Error removing temporary custom highlight:', error)
@@ -359,7 +415,13 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
     setTempHighlightId(null)
     setSelectionUIPosition(null)
     clearSelection()
-  }, [tempHighlightId, highlights, customHighlights, removeHighlightById])
+  }, [
+    tempHighlightId,
+    highlights,
+    customHighlights,
+    removeHighlightById,
+    removeHighlightWithHandles,
+  ])
 
   /**
    * Modify the current highlight
@@ -397,12 +459,12 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
 
       try {
         if (highlight) {
-          removeHighlight(highlight.element)
+          removeHighlightWithHandles(highlight.element)
           if (stableCallbacks.onHighlightRemoved) {
             stableCallbacks.onHighlightRemoved(highlight.selection)
           }
         } else if (customHighlight) {
-          removeHighlight(customHighlight.element)
+          removeHighlightWithHandles(customHighlight.element)
           if (stableCallbacks.onHighlightRemoved) {
             stableCallbacks.onHighlightRemoved(customHighlight.selection)
           }
@@ -416,8 +478,401 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
         console.error('Error removing highlight:', error)
       }
     },
-    [highlights, customHighlights, stableCallbacks, removeHighlightById]
+    [
+      highlights,
+      customHighlights,
+      stableCallbacks,
+      removeHighlightById,
+      removeHighlightWithHandles,
+    ]
   )
+
+  /**
+   * Add draggable handles to a highlight element
+   */
+  const addDraggableHandles = useCallback(
+    (element: HTMLElement, highlightId: string) => {
+      if (!showDraggableHandles) return
+
+      removeDraggableHandles(element)
+
+      element.style.position = 'relative'
+      element.style.display = 'inline'
+
+      const leftHandle = document.createElement('div')
+      leftHandle.className = 'highlight-handle highlight-handle-left'
+      leftHandle.style.cssText = `
+      position: absolute;
+      left: -6px;
+      top: 2px;
+      width: 4px;
+      height: 16px;
+      background: #0c0a09;
+      border-radius: 3px;
+      cursor: w-resize;
+      z-index: 1000;
+      opacity: 0;
+      box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease-in-out;
+    `
+      leftHandle.setAttribute('data-handle', 'left')
+      leftHandle.setAttribute('data-highlight-id', highlightId)
+
+      const rightHandle = document.createElement('div')
+      rightHandle.className = 'highlight-handle highlight-handle-right'
+      rightHandle.style.cssText = `
+      position: absolute;
+      right: -6px;
+      bottom: 1px;
+      width: 4px;
+      height: 16px;
+      background: #0c0a09;
+      border-radius: 3px;
+      cursor: e-resize;
+      z-index: 1000;
+      opacity: 0;
+      box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease-in-out;
+    `
+      rightHandle.setAttribute('data-handle', 'right')
+      rightHandle.setAttribute('data-highlight-id', highlightId)
+
+      leftHandle.addEventListener('mousedown', (e: MouseEvent) => {
+        dragHandlersRef.current?.handleDragStart(highlightId, 'left', e)
+      })
+      rightHandle.addEventListener('mousedown', (e: MouseEvent) => {
+        dragHandlersRef.current?.handleDragStart(highlightId, 'right', e)
+      })
+
+      const updateHandleVisibility = throttle((e: Event) => {
+        const mouseEvent = e as unknown as MouseEvent
+        const rect = element.getBoundingClientRect()
+        const relativeX = mouseEvent.clientX - rect.left
+        const relativeY = mouseEvent.clientY - rect.top
+        const width = rect.width
+        const height = rect.height
+        const edgeThreshold = 20
+
+        const nearLeftEdge = relativeX <= edgeThreshold
+        const nearTopEdge = relativeY <= edgeThreshold
+        const nearBottomEdge = relativeY >= height - edgeThreshold
+        const showLeftHandle = nearLeftEdge || nearTopEdge || nearBottomEdge
+
+        const nearRightEdge = relativeX >= width - edgeThreshold
+        const showRightHandle = nearRightEdge || nearTopEdge || nearBottomEdge
+
+        // Keep the active handle visible during drag
+        const isDraggingThisHighlight = draggedHighlightId === highlightId
+        const isDraggingLeft =
+          isDraggingThisHighlight && dragRef.current?.handle === 'left'
+        const isDraggingRight =
+          isDraggingThisHighlight && dragRef.current?.handle === 'right'
+
+        leftHandle.style.opacity = showLeftHandle || isDraggingLeft ? '1' : '0'
+        rightHandle.style.opacity =
+          showRightHandle || isDraggingRight ? '1' : '0'
+      }, 16) // ~60fps
+
+      element.addEventListener('mousemove', updateHandleVisibility)
+
+      element.addEventListener('mouseleave', () => {
+        if (!draggedHighlightId || draggedHighlightId !== highlightId) {
+          leftHandle.style.opacity = '0'
+          rightHandle.style.opacity = '0'
+        }
+      })
+
+      element.appendChild(leftHandle)
+      element.appendChild(rightHandle)
+
+      // Store handle references for efficient cleanup
+      handleRefs.current.set(element, { left: leftHandle, right: rightHandle })
+    },
+    [showDraggableHandles, draggedHighlightId, removeDraggableHandles]
+  )
+
+  /**
+   * Handle drag movement
+   */
+  const handleDragMove = useCallback(
+    (event: MouseEvent) => {
+      if (!dragRef.current || !containerRef.current) {
+        return
+      }
+
+      const { highlightId, handle } = dragRef.current
+
+      const highlightFromMain = highlights.get(highlightId)
+      const highlightFromCustom = customHighlights.get(highlightId)
+      const highlight = highlightFromMain || highlightFromCustom
+
+      if (!highlight) {
+        return
+      }
+
+      try {
+        const highlightElement = highlight.element
+        const parent = highlightElement.parentNode
+        if (!parent) return
+
+        const originalRange = highlight.selection.range.cloneRange()
+
+        removeDraggableHandles(highlightElement)
+
+        while (highlightElement.firstChild) {
+          parent.insertBefore(highlightElement.firstChild, highlightElement)
+        }
+        parent.removeChild(highlightElement)
+
+        parent.normalize()
+
+        let targetPosition: { node: Node; offset: number } | null = null
+
+        if (document.caretPositionFromPoint) {
+          const caret = document.caretPositionFromPoint(
+            event.clientX,
+            event.clientY
+          )
+          if (caret) {
+            targetPosition = { node: caret.offsetNode, offset: caret.offset }
+          }
+        } else if (document.caretRangeFromPoint) {
+          const range = document.caretRangeFromPoint(
+            event.clientX,
+            event.clientY
+          )
+          if (range) {
+            targetPosition = {
+              node: range.startContainer,
+              offset: range.startOffset,
+            }
+          }
+        }
+
+        if (!targetPosition) {
+          const newRange = document.createRange()
+          newRange.setStart(
+            originalRange.startContainer,
+            originalRange.startOffset
+          )
+          newRange.setEnd(originalRange.endContainer, originalRange.endOffset)
+          const restoredElement = highlightRange(
+            newRange,
+            stableConfig.highlightElement as string,
+            stableConfig.highlightStyle
+          )
+          restoredElement.setAttribute('data-highlight-id', highlightId)
+
+          highlight.element = restoredElement
+          highlight.selection.range = originalRange
+          highlight.selection.boundingRect =
+            originalRange.getBoundingClientRect()
+
+          if (showDraggableHandles) {
+            addDraggableHandles(restoredElement, highlightId)
+          }
+
+          parent.normalize()
+          return
+        }
+
+        // Create range preventing handles from crossing over
+        const newRange = document.createRange()
+
+        if (handle === 'left') {
+          // Left handle dragged - ensure it doesn't go past the right handle
+          const originalEnd = {
+            node: originalRange.endContainer,
+            offset: originalRange.endOffset,
+          }
+
+          // Compare positions using Range.compareBoundaryPoints
+          const targetRange = document.createRange()
+          targetRange.setStart(targetPosition.node, targetPosition.offset)
+          targetRange.collapse(true)
+
+          const endRange = document.createRange()
+          endRange.setStart(originalEnd.node, originalEnd.offset)
+          endRange.collapse(true)
+
+          if (
+            targetRange.compareBoundaryPoints(Range.START_TO_START, endRange) >
+            0
+          ) {
+            const restoredElement = highlightRange(
+              originalRange,
+              stableConfig.highlightElement as string,
+              stableConfig.highlightStyle
+            )
+            restoredElement.setAttribute('data-highlight-id', highlightId)
+
+            highlight.element = restoredElement
+            highlight.selection.range = originalRange
+            highlight.selection.boundingRect =
+              originalRange.getBoundingClientRect()
+
+            if (showDraggableHandles) {
+              addDraggableHandles(restoredElement, highlightId)
+            }
+
+            parent.normalize()
+            return
+          }
+
+          newRange.setStart(targetPosition.node, targetPosition.offset)
+          newRange.setEnd(originalEnd.node, originalEnd.offset)
+        } else {
+          const originalStart = {
+            node: originalRange.startContainer,
+            offset: originalRange.startOffset,
+          }
+
+          const targetRange = document.createRange()
+          targetRange.setStart(targetPosition.node, targetPosition.offset)
+          targetRange.collapse(true)
+
+          const startRange = document.createRange()
+          startRange.setStart(originalStart.node, originalStart.offset)
+          startRange.collapse(true)
+
+          if (
+            targetRange.compareBoundaryPoints(
+              Range.START_TO_START,
+              startRange
+            ) < 0
+          ) {
+            const restoredElement = highlightRange(
+              originalRange,
+              stableConfig.highlightElement as string,
+              stableConfig.highlightStyle
+            )
+            restoredElement.setAttribute('data-highlight-id', highlightId)
+
+            highlight.element = restoredElement
+            highlight.selection.range = originalRange
+            highlight.selection.boundingRect =
+              originalRange.getBoundingClientRect()
+
+            if (showDraggableHandles) {
+              addDraggableHandles(restoredElement, highlightId)
+            }
+
+            parent.normalize()
+            return
+          }
+
+          newRange.setStart(originalStart.node, originalStart.offset)
+          newRange.setEnd(targetPosition.node, targetPosition.offset)
+        }
+
+        const range = newRange
+
+        if (wouldDragCrossLines(originalRange, range)) {
+          const restoredElement = highlightRange(
+            originalRange,
+            stableConfig.highlightElement as string,
+            stableConfig.highlightStyle
+          )
+          restoredElement.setAttribute('data-highlight-id', highlightId)
+
+          highlight.element = restoredElement
+          highlight.selection.range = originalRange
+          highlight.selection.boundingRect =
+            originalRange.getBoundingClientRect()
+
+          if (showDraggableHandles) {
+            addDraggableHandles(restoredElement, highlightId)
+          }
+
+          parent.normalize()
+          return
+        }
+
+        const newText = range.toString().trim()
+
+        if (range.collapsed) {
+          const restoredElement = highlightRange(
+            originalRange,
+            stableConfig.highlightElement as string,
+            stableConfig.highlightStyle
+          )
+          restoredElement.setAttribute('data-highlight-id', highlightId)
+
+          highlight.element = restoredElement
+          highlight.selection.range = originalRange
+          highlight.selection.boundingRect =
+            originalRange.getBoundingClientRect()
+
+          if (showDraggableHandles) {
+            addDraggableHandles(restoredElement, highlightId)
+          }
+
+          parent.normalize()
+          return
+        }
+
+        const newHighlightElement = highlightRange(
+          range,
+          stableConfig.highlightElement as string,
+          stableConfig.highlightStyle
+        )
+        newHighlightElement.setAttribute('data-highlight-id', highlightId)
+
+        highlight.element = newHighlightElement
+        highlight.selection.text = newText
+        highlight.selection.range = range
+        highlight.selection.boundingRect = range.getBoundingClientRect()
+
+        addDraggableHandles(newHighlightElement, highlightId)
+      } catch (error) {
+        console.error('Error updating highlight range:', error)
+      }
+    },
+    [
+      highlights,
+      customHighlights,
+      showDraggableHandles,
+      stableConfig,
+      addDraggableHandles,
+      removeDraggableHandles,
+    ]
+  )
+
+  /**
+   * Handle drag end
+   */
+  const handleDragEnd = useCallback(() => {
+    setDraggedHighlightId(null)
+    dragRef.current = null
+
+    document.removeEventListener('mousemove', handleDragMove)
+    document.removeEventListener('mouseup', handleDragEnd)
+  }, [handleDragMove])
+
+  /**
+   * Handle drag start on highlight handles
+   */
+  const handleDragStart = useCallback(
+    (highlightId: string, handle: 'left' | 'right', event: MouseEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      setDraggedHighlightId(highlightId)
+      dragRef.current = { highlightId, handle }
+
+      document.addEventListener('mousemove', handleDragMove)
+      document.addEventListener('mouseup', handleDragEnd)
+    },
+    [handleDragEnd, handleDragMove]
+  )
+
+  useEffect(() => {
+    dragHandlersRef.current = {
+      handleDragStart,
+      handleDragMove,
+      handleDragEnd,
+    }
+  }, [handleDragStart, handleDragMove, handleDragEnd])
 
   useEffect(() => {
     if (!containerRef.current || selectedContent.length === 0) return
@@ -458,6 +913,10 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
         const highlightId = `preselected-${Date.now()}-${Math.random()}`
         highlightElementNode.setAttribute('data-highlight-id', highlightId)
 
+        if (showDraggableHandles) {
+          addDraggableHandles(highlightElementNode, highlightId)
+        }
+
         addHighlight(highlightId, {
           element: highlightElementNode,
           selection,
@@ -471,6 +930,9 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
     addHighlight,
     customHighlights,
     highlights,
+    showDraggableHandles,
+    draggedHighlightId,
+    addDraggableHandles,
   ])
 
   useEffect(() => {
@@ -513,7 +975,7 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
     const element = containerRef.current
     if (!element) return
 
-    const handleHighlightClick = (event: MouseEvent) => {
+    const handleHighlightClick = (event: MouseEvent | Event) => {
       const target = event.target as HTMLElement
       const highlightId = target.getAttribute('data-highlight-id')
 
@@ -529,9 +991,12 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
       }
     }
 
-    element.addEventListener('click', handleHighlightClick)
+    element.addEventListener('click', handleHighlightClick as EventListener)
     return () => {
-      element.removeEventListener('click', handleHighlightClick)
+      element.removeEventListener(
+        'click',
+        handleHighlightClick as EventListener
+      )
     }
   }, [
     highlights,

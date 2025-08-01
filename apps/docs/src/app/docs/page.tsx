@@ -4,6 +4,7 @@ import React from 'react';
 import { BasicExample } from '@/components/examples/basic';
 import { CustomRendererExample } from '@/components/examples/custom-renderer';
 import { CustomStylingExample } from '@/components/examples/custom-styling';
+import { DraggableHandlesExample } from '@/components/examples/draggable-handles';
 import { HookExample } from '@/components/examples/use-text-highlighter-hook';
 import { PreselectedExample } from '@/components/examples/pre-selected-content';
 import { RemoveHighlightExample } from '@/components/examples/remove-highlight';
@@ -70,6 +71,8 @@ export default function DocumentationPage() {
           <CustomStylingExample />
           <Separator />
           <SelectionBoundaryExample />
+          <Separator />
+          <DraggableHandlesExample />
           <Separator />
           <CustomRendererExample />
           <Separator />

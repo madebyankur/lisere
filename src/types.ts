@@ -153,6 +153,12 @@ export interface TextHighlighterProps
   enabled?: boolean
 
   /**
+   * Whether to show draggable handles on highlighted text
+   * @default false
+   */
+  showDraggableHandles?: boolean
+
+  /**
    * Pre-selected content to highlight on mount
    */
   selectedContent?: Array<{
