@@ -1,4 +1,4 @@
-import { HighlightStyle, SelectionBoundary, TextSelection } from './types'
+import type { HighlightStyle, SelectionBoundary, TextSelection } from './types'
 
 const highlightElementCache = new Map<HTMLElement, Set<HTMLElement>>()
 

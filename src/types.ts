@@ -1,4 +1,4 @@
-import { CSSProperties, JSX, ReactNode } from 'react'
+import type { CSSProperties, JSX, ReactNode } from 'react'
 
 /**
  * Defines how text selection boundaries should be handled

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 
-import { TextHighlighterProps, TextSelection } from './types'
+import type { TextHighlighterProps, TextSelection } from './types'
 import {
   applyReactElementStyles,
   clearSelection,
