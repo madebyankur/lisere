@@ -63,7 +63,7 @@ export function CustomStylingExample() {
               id="highlight-style-label"
               aria-labelledby="highlight-style-label"
               htmlFor="highlight-style-select"
-              className="text-secondary block text-sm font-semibold"
+              className="text-secondary block text-base font-semibold sm:text-sm"
             >
               Style:
             </Label>
@@ -102,7 +102,7 @@ export function CustomStylingExample() {
           </div>
         </div>
         <p className="text-accent mb-4 text-pretty">
-          Choose different highlight styles and see how they apply to your
+          Choose different highlight styles and see how they apply to new
           selections.
         </p>
       </div>

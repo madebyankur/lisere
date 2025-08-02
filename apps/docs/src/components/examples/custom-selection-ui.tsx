@@ -89,7 +89,7 @@ export function SelectionUIExample() {
               ) => void;
               onClose?: () => void;
             }) => (
-              <div className="bg-popover shadow-contrast/5 flex -translate-y-2 items-center gap-1 rounded-2xl py-2 pl-3 pr-2 shadow-[0_0_0_1px,0_0_2px_-1px,0_2px_4px_-2px,0_4px_8px_-4px]">
+              <div className="bg-popover shadow-contrast/5 text-primary flex -translate-y-2 items-center gap-1 rounded-2xl py-2 pl-3 pr-2 shadow-[0_0_0_1px,0_0_2px_-1px,0_2px_4px_-2px,0_4px_8px_-4px]">
                 <span className="mr-2 text-sm">
                   Add to chat "
                   {selection.text.length > 20
@@ -107,7 +107,7 @@ export function SelectionUIExample() {
                       onClose!,
                     )
                   }
-                  className="bg-accent/10 hover:bg-accent/15 select-none rounded-lg px-2.5 py-0.5 text-sm"
+                  className="bg-accent/10 text-primary hover:bg-accent/15 select-none rounded-lg px-2.5 py-0.5 text-sm"
                 >
                   Yes
                 </button>
@@ -117,7 +117,7 @@ export function SelectionUIExample() {
                   onClick={() =>
                     handleCancelHighlight(selection, modifyHighlight!, onClose!)
                   }
-                  className="bg-accent/10 hover:bg-accent/15 select-none rounded-lg px-2.5 py-0.5 text-sm"
+                  className="bg-accent/10 text-primary hover:bg-accent/15 select-none rounded-lg px-2.5 py-0.5 text-sm"
                 >
                   No
                 </button>

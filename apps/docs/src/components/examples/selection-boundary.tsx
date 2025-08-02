@@ -38,7 +38,7 @@ export function SelectionBoundaryExample() {
             id="cursor-label"
             aria-labelledby="cursor-label"
             htmlFor="cursor"
-            className="hover:bg-accent/10 focus-visible:ring-ring flex select-none items-center gap-1.5 rounded-xl p-1.5 pr-2.5 font-medium transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2"
+            className="hover:bg-accent/10 flex w-fit items-center gap-2 rounded-xl p-1.5 pr-2.5 transition-colors duration-150 ease-out"
           >
             <RadioGroupItem value="cursor" id="cursor" />
             Cursor Boundary (exact selection)
@@ -48,7 +48,7 @@ export function SelectionBoundaryExample() {
             id="word-label"
             aria-labelledby="word-label"
             htmlFor="word"
-            className="hover:bg-accent/10 focus-visible:ring-ring flex select-none items-center gap-1.5 rounded-xl p-1.5 pr-2.5 font-medium transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2"
+            className="hover:bg-accent/10 flex w-fit items-center gap-2 rounded-xl p-1.5 pr-2.5 transition-colors duration-150 ease-out"
           >
             <RadioGroupItem value="word" id="word" />
             Word boundary (default)
