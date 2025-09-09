@@ -1,6 +1,6 @@
 {
   "name": "lisere-docs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -15,7 +15,7 @@
     "next": "15.4.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "lisere": "0.1.1"
+    "lisere": "0.1.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
